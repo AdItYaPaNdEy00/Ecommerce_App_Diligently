@@ -1,0 +1,169 @@
+Technical Architecture Document — E-Commerce Demo (Diligently)
+
+Project: E-Commerce_App (React + Express + MongoDB Atlas)
+Author: Aditya Pandey
+
+
+1. Executive summary
+
+This project is a lightweight full-stack e-commerce demo that allows users to:
+
+Browse products (list),
+
+Inspect product details,
+
+Add/remove items from a shopping cart (client-side state persisted in localStorage).
+
+Frontend (client/) is a Vite React app. Backend (server/) is an Express API using Mongoose to talk to MongoDB Atlas. The README contains run steps and available endpoints. 
+
+README
+
+2. High-level architecture
+[Browser / Client]
+   React (Vite) + React Router + Cart Context
+         |
+         | HTTP JSON (VITE_API_BASE -> http://localhost:5000)
+         v
+[Backend API - Express]
+   Routes:
+     GET /api/health
+     GET /api/products
+     GET /api/products/:id
+   Mongoose models
+         |
+         v
+[MongoDB Atlas Cluster]
+   products collection
+
+
+Requests flow: UI → REST API → DB → JSON response → UI updates state (and localStorage for cart).
+
+(README lists these endpoints and stack). 
+
+README
+
+3. Project structure (from README)
+client/   # React app (Vite)
+server/   # Express API + MongoDB (Mongoose)
+README.md
+
+
+See README for run and env steps. 
+
+README
+
+4. Component & module breakdown
+Frontend (client/)
+
+Routing
+
+Home → product list (calls GET /api/products)
+
+ProductDetail → product details (calls GET /api/products/:id)
+
+Cart → shows cart, manage quantities and remove items
+
+State
+
+CartContext implemented using React.createContext + useReducer
+
+Persists cart to localStorage so user cart survives reloads
+
+API layer
+
+Single service file (e.g., api.js) that reads base URL from VITE_API_BASE and exposes functions: getProducts(), getProductById(id)
+
+Styling
+
+Handcrafted CSS (responsive layouts, Grid/Flexbox, mobile-first breakpoints)
+
+Backend (server/)
+
+Server entry (index.js / app.js)
+
+Loads server/.env for MONGODB_URI, PORT, CLIENT_ORIGIN
+
+Connects to MongoDB using Mongoose
+
+Enables CORS for CLIENT_ORIGIN (development)
+
+Models
+
+Product schema: typical fields — name, description, price, image, category, countInStock, etc.
+
+Routes
+
+GET /api/health → simple { status: 'ok' }
+
+GET /api/products → returns list
+
+GET /api/products/:id → returns single product or 404
+
+Optional POST /api/seed (or seed script) used to populate demo products
+
+Seed
+
+npm run seed populates the products collection with demo data (used for initial testing)
+
+(Readme documents the above setup and environment variables). 
+
+README
+
+5. Data model (recommended / example)
+
+Product (Mongoose schema — representative)
+
+{
+  name: String,
+  description: String,
+  price: Number,
+  image: String,       // URL or static path
+  category: String,
+  brand: String,
+  countInStock: Number,
+  rating: Number,
+  numReviews: Number,
+  createdAt: Date
+}
+
+
+This model supports listing, detail view and basic inventory (stock) logic in future.
+
+6. Environment & config
+
+server/.env
+
+MONGODB_URI=your-mongodb-atlas-uri
+PORT=5000
+CLIENT_ORIGIN=http://localhost:5173
+
+
+client/.env (optional)
+
+VITE_API_BASE=http://localhost:5000
+
+
+(These are present in README run steps). 
+
+README
+
+7. Run & dev workflow (from README)
+
+Backend
+
+cd server
+npm install
+# add server/.env (with MONGODB_URI)
+npm run seed   # optional
+npm run dev    # http://localhost:5000
+
+
+Frontend
+
+cd client
+npm install
+# optional client/.env
+npm run dev    # http://localhost:5173
+
+
+(README includes these exact commands).
